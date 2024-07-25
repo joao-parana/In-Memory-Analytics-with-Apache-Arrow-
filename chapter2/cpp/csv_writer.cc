@@ -1,3 +1,8 @@
+/**
+ * O programa lê um arquivo CSV, escreve a tabela em um arquivo CSV de forma
+ * incremental. Se ocorrerem erros durante essas operações, as mensagens de
+ * erro são exibidas no console.
+ */
 // MIT License
 //
 // Copyright (c) 2021 Packt
@@ -85,17 +90,48 @@ arrow::Status incremental_write(std::shared_ptr<arrow::Table> table,
   return arrow::Status::OK();
 }
 
+
 int main(int argc, char** argv) {
+  /*
+  Na função main, é criada uma variável table que armazena um ponteiro compartilhado
+  para um objeto arrow::Table. O valor desse objeto é obtido chamando a função read_csv
+  e passando o caminho do arquivo CSV como argumento. A função read_csv retorna um objeto
+  arrow::Result, que pode conter um valor ou um erro. O método ValueOrDie() é chamado
+  para obter o valor do objeto arrow::Result ou encerrar o programa caso ocorra um erro.
+  */
   std::shared_ptr<arrow::Table> table =
       read_csv("../../sample_data/train.csv").ValueOrDie();
 
+  /*
+  Em seguida, a função write_table é chamada passando a tabela table e o nome do arquivo
+  de saída como argumentos. Essa função é responsável por escrever a tabela em um arquivo
+  CSV. Se ocorrer algum erro durante a escrita, a função retorna um objeto arrow::Status
+  com uma mensagem de erro.
+  */
   auto status = write_table(table, "train.csv");
+
+  /*
+  O código verifica se o objeto arrow::Status retornado pela função write_table é válido
+  (ou seja, se não ocorreu nenhum erro). Se houver um erro, a mensagem de erro é exibida
+  no console e o programa é encerrado com um código de saída 1.
+  */
   if (!status.ok()) {
     std::cerr << status.message() << std::endl;
     return 1;
   }
-
+  /*
+  A função incremental_write é chamada passando a tabela table e o nome do arquivo de saída
+  como argumentos. Essa função realiza uma escrita incremental da tabela em um arquivo CSV.
+  Novamente, se ocorrer algum erro durante a escrita, a função retorna um objeto arrow::Status
+  com uma mensagem de erro.
+  */
   status = incremental_write(table, "train.csv");
+
+  /*
+  O código verifica se o objeto arrow::Status retornado pela função incremental_write é válido.
+  Se houver um erro, a mensagem de erro é exibida no console e o programa é encerrado com um
+  código de saída 1.
+  */
   if (!status.ok()) {
     std::cerr << status.message() << std::endl;
     return 1;
